@@ -6,11 +6,22 @@ import logging
 
 URL = "https://m.land.naver.com/complex/getComplexArticleList"
 
-param = {
+param1 = {
+    'page' : 1,
     'hscpNo': '3359',
     'tradTpCd': 'B2',
     'order': 'date_',
     'showR0': 'N',
+    'title' : '벽산5단지'
+}
+
+param2 = {
+    'page' : 1,
+    'hscpNo': '159',
+    'tradTpCd': 'B2',
+    'order': 'date_',
+    'showR0': 'N',
+    'title' : '가산 두산 위브'
 }
 
 header = {
@@ -19,7 +30,6 @@ header = {
 }
 
 logging.basicConfig(level=logging.INFO)
-page = 0
 
 
 # 텔레그램 봇에게 요청하는 sendTelegramMsg() 이라는 함수를 생성
@@ -29,7 +39,6 @@ def sendTelegramMsg(APIKey, chatID, text):
                      + chatID + "&text="
                      + text + "&parse_mode=Markdown")
     return r
-tempStrList = ''
 # 텔레그램 설정
 TelAPI = "1415596817:AAG8cajcOA_G_KyIFq04GICQCBmw-_6PZEY" # 텔레그램 봇의 KEY. 텔레그램 @BotFather가 알려준 키를 입력.
 TelChan = "1308384308" # 숫자값 또는 @AWESOMEBOT 과 같은 형식으로 입력.
@@ -39,33 +48,33 @@ print ("========내 설정========")
 print ("Telegram 채널ID: " + TelChan)
 print ("==============================")
 
-while True:
-    page += 1
-    param['page'] = page
 
+def getNaverInfo(param):
+
+    tempStrList = ""
     resp = requests.get(URL, params=param, headers=header)
+
     if resp.status_code != 200:
         logging.error('invalid status: %d' % resp.status_code)
-        break
+        tempStrList = "["+param['title']+"]"+"조회시 오류가 발생하였습니다. HTTP STATUS CODE: " + resp.status_code
+        return tempStrList
+
 
     data = json.loads(resp.text)
     result = data['result']
-    if result is None:
-        logging.error('no result')
-        break
+    if result['totAtclCnt'] is 0:
+        tempStrList = "["+param['title']+"]-월세 조회 결과가 없습니다."
+        return tempStrList
 
     for item in result['list']:
-        if float(item['spc2']) < 80 or float(item['spc2']) > 85:
-            continue
-        logging.info('[%s-%s] %s %s층 %s만원' % (item['atclNm'], item['tradTpNm'], item['bildNm'], item['flrInfo'], item['prcInfo']))
+        # logging.info('[%s-%s] %s %s층 %s만원' % (item['atclNm'], item['tradTpNm'], item['bildNm'], item['flrInfo'], item['prcInfo']))
         tempStr = "[{}-{}] {} {} 층 {} 만원".format(item['atclNm'], item['tradTpNm'], item['bildNm'], item['flrInfo'], item['prcInfo'])
-        tempStrList = tempStrList.join(tempStr)
-        print(tempStrList)
+        tempStrList += tempStr+"\n"
 
-    if result['moreDataYn'] == 'N':
+    return tempStrList
 
-        break
+    # if result['moreDataYn'] == 'N':
 
 
-sendTelegramMsg(TelAPI, TelChan, tempStrList)
-
+sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param1))
+sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param2))
