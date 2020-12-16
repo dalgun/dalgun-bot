@@ -3,8 +3,12 @@
 import requests
 import json
 import logging
+import time
+from random import randint
 
 URL = "https://m.land.naver.com/complex/getComplexArticleList"
+# 시간 표시 형식
+tType = "%Y-%m-%d %H:%M:%S"
 
 param1 = {
     'page' : 1,
@@ -75,6 +79,13 @@ def getNaverInfo(param):
 
     # if result['moreDataYn'] == 'N':
 
+while(1):
+    try:
+        sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param1))
+        sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param2))
+    # 오류발생시 무시하고 반복 (오류 내용 출력)
+    except Exception as ex:
+        print("[" + time.strftime(tType) + "] 오류 발생 - 재시도합니다.", ex)
 
-sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param1))
-sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param2))
+    print("[" + time.strftime(tType) + "] 대기합니다...")
+    time.sleep(randint(1800,1810))
