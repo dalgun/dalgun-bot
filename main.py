@@ -10,16 +10,8 @@ URL = "https://m.land.naver.com/complex/getComplexArticleList"
 # 시간 표시 형식
 tType = "%Y-%m-%d %H:%M:%S"
 
-param1 = {
-    'page' : 1,
-    'hscpNo': '3359',
-    'tradTpCd': 'B2',
-    'order': 'date_',
-    'showR0': 'N',
-    'title' : '벽산5단지'
-}
 
-param2 = {
+param = {
     'page' : 1,
     'hscpNo': '159',
     'tradTpCd': 'B2',
@@ -81,8 +73,7 @@ def getNaverInfo(param):
 
 while(1):
     try:
-        sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param1))
-        sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param2))
+        sendTelegramMsg(TelAPI, TelChan, getNaverInfo(param))
     # 오류발생시 무시하고 반복 (오류 내용 출력)
     except Exception as ex:
         print("[" + time.strftime(tType) + "] 오류 발생 - 재시도합니다.", ex)
